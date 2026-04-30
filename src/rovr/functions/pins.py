@@ -1,11 +1,14 @@
 import json
 from copy import deepcopy
 from os import makedirs, path
-from typing import NotRequired, TypedDict, cast
+from typing import NotRequired, TypedDict, cast, Protocol
+from pathlib import Path
+import xml.etree.ElementTree as ET
 
 from rovr.variables.maps import RovrVars
+from rovr.variables.constants import config
 
-from .path import dump_exc , normalise
+from .path import dump_exc, normalise
 
 pins = {}
 PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
@@ -40,38 +43,34 @@ class PinsDict(TypedDict):
     "Other added folders"
 
 
-class PinProvider():
+class PinProvider(Protocol):
     @classmethod
-    def load_pins(cls) -> list[PinItem]:
-        ...
+    def load_pins(cls) -> list[PinItem]: ...
 
     @classmethod
-    def add_pin(cls, pin_name: str, pin_path: str | bytes) -> None:
-        ...
+    def add_pin(cls, pin_name: str, pin_path: str | bytes) -> None: ...
 
     @classmethod
-    def remove_pin(cls, pin_path: str | bytes) -> None:
-        ...
+    def remove_pin(cls, pin_path: str | bytes) -> None: ...
 
     @classmethod
-    def toggle_pin(cls, pin_name: str, pin_path: str) -> None:
-        ...
+    def toggle_pin(cls, pin_name: str, pin_path: str) -> None: ...
 
 
 @register_bookmarks("empty")
 @register_places("empty")
-class EmptyPinProvider(PinProvider):
+class EmptyPinProvider():
     @classmethod
     def load_pins(cls) -> list[PinItem]:
         return []
 
 
 @register_places("default")
-class DefaultPlaces(PinProvider):
+class DefaultPlaces():
 
     @classmethod
     def load_pins(cls) -> list[PinItem]:
-        return [
+        return _sanitize([
             {"name": "Home", "path": "$HOME"},
             {"name": "Downloads", "path": "$DOWNLOADS"},
             {"name": "Documents", "path": "$DOCUMENTS"},
@@ -79,11 +78,11 @@ class DefaultPlaces(PinProvider):
             {"name": "Pictures", "path": "$PICTURES"},
             {"name": "Videos", "path": "$VIDEOS"},
             {"name": "Music", "path": "$MUSIC"},
-        ]
+        ])
 
 
 @register_places("rovr")
-class RovrPinedPlaces(PinProvider):
+class RovrPinedPlaces():
 
     @classmethod
     def load_pins(cls) -> list[PinItem]:
@@ -91,16 +90,17 @@ class RovrPinedPlaces(PinProvider):
             places = []
             with open(PIN_PATH, "r") as f:
                 loaded_pins = cast(PinsDict, json.load(f))
-                for place in loaded_pins["default"]:
-                    place["path"]=normalise(_expand_vars(place["path"]))
-                    places.append(place)
+                # for place in loaded_pins["default"]:
+                #     place["path"]=normalise(_expand_vars(place["path"]))
+                #     places.append(place)
+                places = _sanitize(loaded_pins["default"])
         except (IOError, ValueError, json.decoder.JSONDecodeError):
             places = DefaultPlaces.load_pins()
         return places
 
 
 @register_bookmarks("rovr")
-class RovrPinedBookmarks(PinProvider):
+class RovrPinedBookmarks():
 
     @classmethod
     def load_pins(cls) -> list[PinItem]:
@@ -108,29 +108,56 @@ class RovrPinedBookmarks(PinProvider):
             bookmarks = []
             with open(PIN_PATH, "r") as f:
                 loaded_pins = cast(PinsDict, json.load(f))
-                for bookmark in loaded_pins["pins"]:
-                    bookmark["path"]=normalise(_expand_vars(bookmark["path"]))
-                    bookmarks.append(bookmark)
+                # for bookmark in loaded_pins["pins"]:
+                #     bookmark["path"]=normalise(_expand_vars(bookmark["path"]))
+                #     bookmarks.append(bookmark)
+                bookmarks = _sanitize(loaded_pins["pins"])
         except (IOError, ValueError, json.decoder.JSONDecodeError):
             bookmarks = []
         return bookmarks
 
 
 @register_bookmarks("gtk")
-class GTKBookmarks(PinProvider):
+class GTKBookmarks():
+    bookmarks_path = "~/.config/gtk-3.0/bookmarks"
+
     @classmethod
     def load_pins(cls) -> list[PinItem]:
         bookmarks = []
-        from pathlib import Path
-        with open(Path("~/.config/gtk-3.0/bookmarks").expanduser()) as bookmarks_file:
-            for line in bookmarks_file.readlines():
-                try:
-                    path, name = line.strip().split(" ", 1)
-                    bookmarks.append({"name": name, "path": str(Path.from_uri(path))})
-                except ValueError:
-                    pass
+        try:
+            with open(cls.bookmarks_path) as bookmarks_file:
+                for line in bookmarks_file.readlines():
+                    try:
+                        path, name = line.strip().split(" ", 1)
+                        bookmarks.append({"name": name, "path": str(Path.from_uri(path))})
+                    except ValueError:
+                        pass
+        except OSError:
+            pass
         return bookmarks
 
+
+@register_bookmarks("kde")
+class KDEBookmarks():
+    bookmarks_path = "~/.local/share/kfile/bookmarks.xml"
+
+    @classmethod
+    def load_pins(cls) -> list[PinItem]:
+        bookmarks = []
+        try:
+            root = ET.parse(cls.bookmarks_path).getroot()
+            for elem in root.iter("bookmark"):
+                try:
+                    title_elem = elem.find("title")
+                    name = title_elem.text.strip()
+                    path = str(Path.from_uri(elem.get("href", "").strip()))
+                    bookmarks.append({"name": name, "path": path})
+                except ValueError:
+                    pass
+        except OSError:
+            pass
+
+        return bookmarks
 
 def _expand_vars(path: str) -> str:
     for var in RovrVars.slots:
@@ -138,26 +165,27 @@ def _expand_vars(path: str) -> str:
     return path
 
 
-def load_pins():
+def _sanitize(pins: list[PinItem]) -> list[PinItem]:
+    out = []
+    for pin in pins:
+        pin["path"] = normalise(_expand_vars(pin["path"]))
+        out.append(pin)
+    return out
 
-    # get the values from user config, not implemented yet
-    config_places = ["rovr"]
-    config_bookmarks = ["rovr"] # ["rovr", "gtk"] is possible
 
+def load_pins() -> PinsDict:
     _places = []
     _bookmarks = []
 
-    for provider in config_places:
+    for provider in config["interface"]["pins_places"]:
         _places.extend(_places_providers[provider].load_pins())
-    for provider in config_bookmarks:
+    for provider in config["interface"]["pins_bookmarks"]:
         _bookmarks.extend(_bookmarks_providers[provider].load_pins())
 
     return {
         "default": _places,
         "pins": _bookmarks,
     }
-
-
 
 
 def add_pin(pin_name: str, pin_path: str | bytes) -> None:
