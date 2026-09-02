@@ -1,0 +1,220 @@
+/**********************************************************
+    █▀▀▄ ▄▀▀▀▄ █▀▀▄ █▀▀▄ █▀▀▀ █▀▀▄ █    █▀▀▀ ▄▀▀▀ ▄▀▀▀
+    █▀▀▄ █   █ █▀▀▄ █  █ █▀▀  █▀▀▄ █    █▀▀   ▀▀▄  ▀▀▄
+    ▀▀▀   ▀▀▀  ▀  ▀ ▀▀▀  ▀▀▀▀ ▀  ▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀  ▀▀▀
+*****************************************************2609*/
+
+
+$background: #181818;
+$surface: #202020;
+$panel: #2A2A2A;
+$foreground: #F1F3F6;
+$primary: #7818F8;
+$secondary: #B8A0FF;
+$accent: #DFA0FF;
+$warning: #FFD000;
+$error: #FF1744;
+$success: #00F080;
+$dark: true;
+$bar-gradient-default: #7818F8 #D820FF;
+$bar-gradient-error: #FF1744 #FF20A0;
+$input-cursor-background: #7817F8;
+$input-selection-background: #5720A8;
+$input-selection-foreground: #FFFFFF;
+$header-blurred: #6A6A75;
+$header-focused: #F1F3F6;
+
+#menu_wrapper, #footer, #processes, #metadata, #clipboard,
+#pinned_sidebar_container, #file_list_container, #preview_sidebar {
+    border: blank $background;
+    background: $background;
+    border-title-color: $header-blurred;
+    border-subtitle-color: $header-blurred;
+}
+
+#menu_wrapper:focus-within, #processes:focus-within, #metadata:focus-within,
+#clipboard:focus-within, #pinned_sidebar_container:focus-within,
+#file_list_container:focus-within, #preview_sidebar:focus-within {
+    border: blank $surface;
+    background: $surface;
+    border-title-color: $header-focused;
+    border-subtitle-color: $header-focused;
+}
+
+#file_list_container {
+    border-subtitle-color: $header-blurred;
+    border-subtitle-background: $background;
+}
+
+#file_list_container:focus-within {
+    border-subtitle-color: $secondary;
+    border-subtitle-background: $surface;
+}
+
+#footer {
+    border-top: blank $background;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+}
+
+Screen.-all-horizontal #root.compact-buttons #menu_wrapper #below_menu PathInput,
+Screen.-all-horizontal #root.compact-buttons #menu_wrapper:focus-within #below_menu #path_switcher,
+Screen.-all-horizontal #root.compact-buttons #menu_wrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
+    padding-left: 1;
+}
+
+ModalScreen #dialog, Dismissible #dialog, YesOrNo #dialog,
+PasteScreen > #dialog, PasteDropScreen #dialog, FileNameConflict #dialog,
+FileInUse #dialog, DeleteFiles #dialog, TrashScreen #dialog {
+    border: none !important;
+    outline: none !important;
+    background: $panel;
+    color: $foreground;
+}
+
+ModalScreen Button {
+    height: 3;
+    min-height: 3;
+    padding: 0 2;
+    margin: 0;
+    content-align: center middle;
+    border: none !important;
+    outline: none !important;
+    background: $foreground !important;
+    color: $background !important;
+}
+
+ModalScreen Button.-primary { background: $primary !important; }
+ModalScreen Button.-success { background: $success !important; }
+ModalScreen Button.-warning { background: $warning !important; }
+ModalScreen Button.-error { background: $error !important; }
+
+ModalScreen Button:hover,
+ModalScreen Button:focus {
+    color: #FFFFFF !important;
+}
+
+ModalScreen Button.-primary:hover,
+ModalScreen Button.-primary:focus {
+    background: $primary !important;
+    color: #FFFFFF !important;
+}
+
+ModalScreen Button.-success:hover,
+ModalScreen Button.-success:focus {
+    background: $success !important;
+    color: #FFFFFF !important;
+}
+
+ModalScreen Button.-warning:hover,
+ModalScreen Button.-warning:focus {
+    background: $warning !important;
+    color: #FFFFFF !important;
+}
+
+ModalScreen Button.-error:hover,
+ModalScreen Button.-error:focus {
+    background: $error !important;
+    color: #FFFFFF !important;
+}
+
+ModalScreen Input {
+    border: none !important;
+    outline: none !important;
+}
+
+ModalScreen Input:focus {
+    background: 12% $primary;
+}
+
+CommandPalette {
+    border: none !important;
+    outline: none !important;
+    background: $background 50%;
+}
+
+CommandPalette #--input, CommandPalette CommandList {
+    border: none !important;
+    outline: none !important;
+    background: $panel;
+}
+
+CommandPalette #--input:focus {
+    background: 12% $primary;
+}
+
+#theme_chooser_input {
+    border: blank $background !important;
+}
+
+#theme_chooser_options.empty {
+    border: blank transparent !important;
+}
+
+Input .input--cursor {
+    background: $primary !important;
+    color: #FFFFFF !important;
+}
+
+Input .input--selection {
+    background: $input-selection-background;
+    color: $input-selection-foreground;
+}
+
+Input .input--placeholder {
+    color: $secondary;
+}
+
+Tooltip, Tooltip:focus {
+    border: none !important;
+    outline: none !important;
+    background: $panel;
+    color: $foreground;
+}
+
+Toast, Toast.-information, Toast.-warning, Toast.-error {
+    border: none !important;
+    outline: none !important;
+}
+
+Toast.-information { color: $accent; }
+Toast.-warning { color: $warning; }
+Toast.-error { color: $error; }
+
+PopupOptionList, KeyChordPopup {
+    border: none !important;
+    outline: none !important;
+    background: $panel;
+}
+
+PathAutoCompleteInput {
+    border: none !important;
+    outline: none !important;
+}
+
+PathAutoCompleteInput AutoCompleteList {
+    border: blank $surface !important;
+    outline: none !important;
+    background: $surface;
+}
+
+Switch > .switch--slider {
+    color: $panel-lighten-3 !important;
+}
+
+Switch.-on > .switch--slider {
+    color: $success !important;
+}
+
+Switch:disabled > .switch--slider {
+    color: $foreground !important;
+}
+
+ModalScreen OptionList, ModalScreen SpecialOptionList, ModalScreen SelectionList,
+PasteScreen OptionList, DeleteFiles OptionList, ArchiveCreationScreen OptionList,
+TrashScreen SelectionList, ThemeChooser OptionList {
+    border: none !important;
+    outline: none !important;
+    background: transparent;
+}
