@@ -51,6 +51,16 @@ $header-focused: #F1F3F6;
     border-subtitle-background: $surface;
 }
 
+#preview_sidebar {
+    border-subtitle-color: $header-blurred;
+    border-subtitle-background: $background;
+}
+
+#preview_sidebar:focus-within {
+    border-subtitle-color: $secondary;
+    border-subtitle-background: $surface;
+}
+
 #footer {
     border-top: blank $background;
     border-left: none;
@@ -217,4 +227,10 @@ TrashScreen SelectionList, ThemeChooser OptionList {
     border: none !important;
     outline: none !important;
     background: transparent;
+}
+
+#keybinds_group {
+    border: none !important;
+    outline: none !important;
+    background: $panel;
 }
