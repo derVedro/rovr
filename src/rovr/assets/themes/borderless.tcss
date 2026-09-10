@@ -223,10 +223,15 @@ Switch:disabled > .switch--slider {
 
 ModalScreen OptionList, ModalScreen SpecialOptionList, ModalScreen SelectionList,
 PasteScreen OptionList, DeleteFiles OptionList, ArchiveCreationScreen OptionList,
-TrashScreen SelectionList, ThemeChooser OptionList {
+TrashScreen SelectionList{
     border: none !important;
     outline: none !important;
     background: transparent;
+}
+
+ThemeChooser > VerticalGroup:focus-within > OptionList {
+    border: blank !important;
+    background: $panel !important;
 }
 
 #keybinds_group {
