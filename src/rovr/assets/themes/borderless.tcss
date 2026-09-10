@@ -234,3 +234,8 @@ TrashScreen SelectionList, ThemeChooser OptionList {
     outline: none !important;
     background: $panel;
 }
+
+ModalInput #modalInput_group {
+    border: blank !important;
+    background: $panel !important;
+}
